@@ -1,28 +1,23 @@
-#!/usr/bin/env python3
-
-from app import app
-from models import db, Plant
-
+from server.app import app
+from server.models import db, Plant
 
 with app.app_context():
+    print("🌱 Seeding data...")
 
-    Plant.query.delete()
+    db.drop_all()
+    db.create_all()
 
-    aloe = Plant(
-        id=1,
-        name="Aloe",
-        image="./images/aloe.jpg",
-        price=11.50,
-        is_in_stock=True,
-    )
+    plants = [
+        Plant(name="Aloe Vera", image="https://tinyurl.com/2p9zzc8p", price=10.99),
+        Plant(name="Peace Lily", image="https://tinyurl.com/ymz8rsbj", price=12.50),
+        Plant(name="Spider Plant", image="https://tinyurl.com/mr2h8x6b", price=8.75),
+    ]
 
-    zz_plant = Plant(
-        id=2,
-        name="ZZ Plant",
-        image="./images/zz-plant.jpg",
-        price=25.98,
-        is_in_stock=False,
-    )
-
-    db.session.add_all([aloe, zz_plant])
+    db.session.add_all(plants)
     db.session.commit()
+
+    print("✅ Done seeding!")
+
+
+
+

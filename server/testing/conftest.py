@@ -1,9 +1,29 @@
-#!/usr/bin/env python3
+import pytest
+from server.app import app, db
+from server.models import Plant
 
-def pytest_itemcollected(item):
-    par = item.parent.obj
-    node = item.obj
-    pref = par.__doc__.strip() if par.__doc__ else par.__class__.__name__
-    suf = node.__doc__.strip() if node.__doc__ else node.__name__
-    if pref or suf:
-        item._nodeid = ' '.join((pref, suf))
+@pytest.fixture(scope="function")
+def test_app():
+    app.config.update({
+        "TESTING": True,
+        "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:",
+        "SQLALCHEMY_TRACK_MODIFICATIONS": False,
+    })
+
+    with app.app_context():
+        db.create_all()
+
+        plant = Plant(
+            name="Test Plant",
+            image="https://example.com/plant.jpg",
+            price=19.99,
+            is_in_stock=True
+        )
+        db.session.add(plant)
+        db.session.commit()
+
+        yield app
+
+        db.session.remove()
+        db.drop_all()
+
